@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+
+
+
+    <div id="body">
+
+        <div id="left">
+            <h1 class="text">{{me}}</h1>
+
+            <div id="myProgress">
+                <div id="myPrgColor" :style="myProgFunc()">
+                    <div class="healt">{{myHealt}}%</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="right">
+            <h1 class="text">{{monster}}</h1>
+            <div id="monsterProgress">
+                <div id="monsterPrgColor" :style="monsterProgFunc()">
+                    <div class="healt">{{monsterHealt}}%</div>
+                </div>
+            </div>
+        </div>
+
+
+        <div id="button">
+            <button @click="showNG = !showNG" v-show="showNG" id="newGameButt">Yeni Oyun</button>
+            <div v-show="!showNG">
+                <button id="attackButt" @click="attackFunct()" :disable="isDisable">Saldırı</button>
+                <button id="speAttackButt" @click="specAttackFunct()" :disable="isDisable">Özel Saldırı</button>
+                <button id="helpButt" @click="helpFunct()" :disable="isDisable">İlk Yardım</button>
+                <button id="giveUpButt" @click="giveUpFunct()" :disable="isDisable">Pes Et!</button>
+            </div>
+        </div>
+
+
+        <div id="attackInfo" v-show="showLog">
+            <div v-for="object in logList" id="meLog">
+
+                <div>
+                    <p v-if="object.who == 'Sen'" :style="{backgroundColor: object.color}" class="log">
+                        {{ object.who }}in Saldırın : ({{object.point }})
+                    </p>
+
+                    <p v-else-if="object.who == 'Canavar'"
+                        :style="{backgroundColor: object.color, color: object.textColor,}" class="log">
+                        {{ object.who }} Saldırsı : ({{ object.point }}) <br>
+                    </p>
+                    <p v-else="object.who == 'help'" :style="{backgroundColor: object.color, color: object.textColor,}" class="log">
+                        İlk Yardım Takviyesi : ({{ object.point }}) <br>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div id="sizedBox"></div>
+    </div>
+
+
+    <script>
+        new Vue({
+            el: '#body',
+            data: {
+                me: 'Sen',
+                monster: 'Canavar',
+                help: 'help',
+                showNG: true,
+                myPoint: 0,
+                myHealt: 100,
+                monsterPoint: 0,
+                monsterHealt: 100,
+                helpPoint: 0,
+                myVic: false,
+                monsVic: false,
+                isDisable: false,
+                showLog: false,
+                logList: [],
+
+            },
+
+            methods: {
+                myProgFunc: function () {
+
+                    if (this.myHealt <= 0) {
+                        this.myHealt = 0;
+
+                        return { width: 0 + "%", }, this.isGameOver();
+
+                    } else {
+                        return { width: this.myHealt + "%", }
+                    }
+
+                },
+                monsterProgFunc: function () {
+                    if (this.monsterHealt <= 0) {
+                        this.monsterHealt = 0;
+
+                        return { width: 0 + "%", }, this.isGameOver();
+
+                    } else {
+                        return { width: this.monsterHealt + "%", }
+                    }
+
+                },
+
+                attackFunct: function () {
+                    this.healtyFunct(11, 3);
+
+                    // this.monsterHealtFunc();
+                    // this.myPoint = Math.floor(Math.random() * 11) + 3;
+                    // this.monsterHealt = this.monsterHealt - this.myPoint;
+                },
+                specAttackFunct: function () {
+                    this.healtyFunct(12, 4);
+
+                    // this.monsterHealtFunc();
+                    // this.myPoint = Math.floor(Math.random() * 16) + 5;
+                    // return this.monsterHealt = this.monsterHealt - this.myPoint;
+                },
+
+                healtyFunct: function (duration, level) {
+                    this.showLog = true;
+                    this.monsterHealtFunc();
+                    this.myPoint = Math.floor(Math.random() * duration) + level;
+                    this.logFunc();
+                    return this.monsterHealt = this.monsterHealt - this.myPoint;
+                },
+
+                helpFunct: function () {
+                    this.helpPoint = Math.floor(Math.random() * 10) + 2;
+                    this.myHealt = this.myHealt + this.helpPoint;
+                    if (this.myHealt <= 100) {
+                        return this.myHealt, this.helpLogFunc();
+                    } else if (this.myHealt >= 100) {
+
+                        return this.myHealt = 100, this.helpLogFunc();
+                    }
+
+                },
+                giveUpFunct: function () {
+
+                    if (confirm('Pes etmek istediğine emin misiniz?')) {
+                        this.myHealt = 0;
+                        alert('Pes ettiğiniz için kaybettiniz...');
+
+                    }
+                },
+                monsterHealtFunc: function () {
+
+                    this.monsterPoint = Math.floor(Math.random() * 10) + 2;
+                    return this.myHealt = this.myHealt - this.monsterPoint;
+
+
+
+                },
+
+                isGameOver: function () {
+                    if (this.myHealt <= 0) {
+                        this.myVic = false;
+                        this.monsVic = true;
+                        alert('Maalesef oyunu kaybettiniz...');
+                        if (confirm('Tekrar oynamak ister misiniz?')) {
+                            return this.myPoint = 0,
+                                this.myHealt = 100,
+                                this.monsterPoint = 0,
+                                this.monsterHealt = 100,
+                                this.helpPoint = 0,
+                                this.showLog = false,
+                                this.resetLogFunct();
+                        } else {
+                            return this.isDisable = true;
+                        }
+                    } else if (this.monsterHealt <= 0) {
+                        this.myVic = true;
+                        this.monsVic = false;
+                        alert('Oyunu ezici bir üstünlükle kazandınız!');
+                        if (confirm('Tekrar oynamak ister misiniz?')) {
+                            return this.myPoint = 0,
+                                this.myHealt = 100,
+                                this.monsterPoint = 0,
+                                this.monsterHealt = 100,
+                                this.helpPoint = 0,
+                                this.resetLogFunct();
+                        } else {
+                            return this.myPoint = 0,
+                                this.myHealt = 100,
+                                this.monsterPoint = 0,
+                                this.monsterHealt = 100,
+                                this.helpPoint = 0,
+                                this.showNG = true,
+                                this.showLog = false,
+                                this.resetLogFunct();
+                        }
+
+                    }
+                },
+                logFunc: function () {
+                    this.logList.push({ who: this.me, point: this.myPoint, color: 'rgb(83, 236, 44) ' });
+                    this.logList.push({ who: this.monster, point: this.monsterPoint, color: 'rgb(240, 29, 29)', textColor: 'white' },);
+
+
+
+                },
+                helpLogFunc: function () {
+                    this.logList.push({ who: this.help, point: this.helpPoint, color: 'rgb(61, 104, 243)', textColor: 'white' });
+                },
+                resetLogFunct: function () {
+                    this.showLog = false;
+                    this.logList.splice(0);
+                },
+
+
+
+            },
+        });
+    </script>
+
+
+</body>
+
+</html>
